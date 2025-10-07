@@ -19,6 +19,8 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 
 
 namespace PanelUI {
+
+
     bool showMenu = true;
     ID3D11Device* pDevice = nullptr;
     ID3D11DeviceContext* pContext = nullptr;
@@ -178,19 +180,18 @@ namespace PanelUI {
         magnetShrines = "Totems: " + std::to_string(Game->GreedShrines.count());
         ImGui::TextColored(ImVec4(0.92f, 0.25f, 0.20f, 1.0f), magnetShrines.c_str());
 
+        ImGui::Checkbox("Predefined seed", &Game->bSeed);
+        if (Game->bSeed) {
+            ImGui::InputInt("##input_iseed", &Game->iSeed, 0, 0, ImGuiInputTextFlags_None);
 
+            ImGui::SameLine();
+            if (ImGui::Button("Gen")) {
+                Game->iSeed = GenerateRandomInt();
+            }
 
+        }
         
-        //const char* text = "by Korea";
-        //ImVec2 textSize = ImGui::CalcTextSize(text);
 
-        //// ustaw pozycjê kursora tak, by tekst by³ w prawym dolnym rogu
-        //ImVec2 s = ImGui::GetWindowSize();
-        //ImGui::SetCursorPosY(s.y - textSize.y - ImGui::GetTextLineHeight());
-        //ImGui::SetCursorPosX(s.x - textSize.x * 1.5);
-        //ImGui::Text(text);
-
-        ImGui::NewLine();
         ImGui::End();
         
         ImGui::Render();

@@ -4,6 +4,8 @@
 
 class _Game {
 public:
+    bool bSeed = false;
+    int iSeed = -1;
 
     bool gameWorking = false;
 

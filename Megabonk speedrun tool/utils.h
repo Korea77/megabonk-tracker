@@ -1,4 +1,8 @@
 ﻿#pragma once
+
+
+int GenerateRandomInt();
+
 struct Il2CppClass;
 
 struct Il2CppObject {
