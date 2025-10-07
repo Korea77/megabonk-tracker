@@ -1,7 +1,10 @@
 ﻿#pragma once
-
+#include <vector>
 
 int GenerateRandomInt();
+bool ValidateRandomInstance(void* randObjPtr);
+void RemoveInvalidRandoms(std::vector<void*>& vec);
+
 
 struct Il2CppClass;
 

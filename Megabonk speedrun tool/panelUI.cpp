@@ -132,7 +132,6 @@ namespace PanelUI {
     }
 
     void Render() {
-        if (!showMenu) return;
 
         if (!pContext || !pRenderTargetView) return;
 
@@ -146,54 +145,60 @@ namespace PanelUI {
         int screenWidth = GetSystemMetrics(SM_CXSCREEN);
         int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-        ImGui::SetNextWindowSize(ImVec2(screenWidth * 0.15, -1), 0);
-        ImVec2 windowSize = ImGui::GetIO().DisplaySize;
-        ImGui::Begin(" ", nullptr, window_flags);
+        if (showMenu) {
+            ImGui::SetNextWindowSize(ImVec2(screenWidth * 0.15, -1), 0);
+            ImVec2 windowSize = ImGui::GetIO().DisplaySize;
+            ImGui::Begin(" ", nullptr, window_flags);
 
-        std::string chestSTR = "Free chests: ";
-        
+            std::string chestSTR = "Free chests: ";
 
-        chestSTR += std::to_string(Game->Chests.getFreeChests());
-        ImGui::Text("Merchants:");
-        RenderMerchantMap(Game->Merchants.getMerchants());
 
-        ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), chestSTR.c_str());
-        std::string expGround = "EXP on ground: " + std::to_string(Game->Pickups.getExpOnGround());
-        ImGui::TextColored(ImVec4(0.0f, 0.5f, 1.0f, 1.0f), expGround.c_str());
-        
-        
-        ImGui::Text("Microwaves:");
-        RenderMerchantMap(Game->Microwaves.getMicrowaves());
+            chestSTR += std::to_string(Game->Chests.getFreeChests());
+            ImGui::Text("Merchants:");
+            RenderMerchantMap(Game->Merchants.getMerchants());
 
-        std::string moaiShrines = "Moai shrines: " + std::to_string(Game->MoaiShrines.count());
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), moaiShrines.c_str());
+            ImGui::TextColored(ImVec4(1.0, 1.0, 0.0, 1.0), chestSTR.c_str());
+            std::string expGround = "EXP on ground: " + std::to_string(Game->Pickups.getExpOnGround());
+            ImGui::TextColored(ImVec4(0.0f, 0.5f, 1.0f, 1.0f), expGround.c_str());
 
-        std::string magnetShrines = "Magnet shrines: " + std::to_string(Game->MagnetShrines.count());
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), magnetShrines.c_str());
 
-        magnetShrines = "Cursed shrines: " + std::to_string(Game->CursedShrines.count());
-        ImGui::TextColored(ImVec4(0.92f, 0.25f, 0.20f, 1.0f), magnetShrines.c_str());
+            ImGui::Text("Microwaves:");
+            RenderMerchantMap(Game->Microwaves.getMicrowaves());
 
-        magnetShrines = "Challenge shrines: " + std::to_string(Game->ChallengeShrines.count());
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), magnetShrines.c_str());
+            std::string moaiShrines = "Moai shrines: " + std::to_string(Game->MoaiShrines.count());
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), moaiShrines.c_str());
 
-        magnetShrines = "Totems: " + std::to_string(Game->GreedShrines.count());
-        ImGui::TextColored(ImVec4(0.92f, 0.25f, 0.20f, 1.0f), magnetShrines.c_str());
+            std::string magnetShrines = "Magnet shrines: " + std::to_string(Game->MagnetShrines.count());
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), magnetShrines.c_str());
 
-        ImGui::Checkbox("Predefined seed", &Game->bSeed);
-        if (Game->bSeed) {
-            ImGui::InputInt("##input_iseed", &Game->iSeed, 0, 0, ImGuiInputTextFlags_None);
+            magnetShrines = "Cursed shrines: " + std::to_string(Game->CursedShrines.count());
+            ImGui::TextColored(ImVec4(0.92f, 0.25f, 0.20f, 1.0f), magnetShrines.c_str());
 
-            ImGui::SameLine();
-            if (ImGui::Button("Gen")) {
-                Game->iSeed = GenerateRandomInt();
+            magnetShrines = "Challenge shrines: " + std::to_string(Game->ChallengeShrines.count());
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), magnetShrines.c_str());
+
+            magnetShrines = "Totems: " + std::to_string(Game->GreedShrines.count());
+            ImGui::TextColored(ImVec4(0.92f, 0.25f, 0.20f, 1.0f), magnetShrines.c_str());
+
+            ImGui::Checkbox("Predefined seed", &Game->bSeed);
+            if (Game->bSeed) {
+                ImGui::InputInt("##input_iseed", &Game->iSeed, 0, 0, ImGuiInputTextFlags_None);
+
+                ImGui::SameLine();
+                if (ImGui::Button("Gen")) {
+                    Game->iSeed = GenerateRandomInt();
+                }
+
             }
 
-        }
-        
 
-        ImGui::End();
-        
+            ImGui::End();
+        }
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::GetBackgroundDrawList()->AddText(ImVec2(1 + 1, io.DisplaySize.y - ImGui::GetTextLineHeight() + 1), IM_COL32(0, 0, 0, 255), "Megabonk tool by Koorea!");
+        ImGui::GetBackgroundDrawList()->AddText(ImVec2(1, io.DisplaySize.y - ImGui::GetTextLineHeight()), IM_COL32(255, 255, 0, 255), "Megabonk tool by Koorea!");
+
+
         ImGui::Render();
         pContext->OMSetRenderTargets(1, &pRenderTargetView, nullptr);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

@@ -5,8 +5,6 @@
 
 
 #include "Sigscan.h"
-#include <thread>
-#include <chrono>
 
 
 #include "assert/MinHook.h"
@@ -27,11 +25,14 @@ _Game* Game = nullptr;
 
 
 
+typedef void(__cdecl* tInitState)(int);
 typedef void(__fastcall* Random_Ctor_t)(void* _this, void* seed);
 Random_Ctor_t oRandom_Ctor = nullptr;
+tInitState oInitState;
 
 
-void* createdRandom;
+std::vector<void*> createdRandom;
+
 
 void __fastcall hkIl2CppRandom(void* rcx, void* seed) {
 
@@ -40,12 +41,20 @@ void __fastcall hkIl2CppRandom(void* rcx, void* seed) {
         return;
     }
 
-    if (createdRandom != nullptr) {
-        auto InitState = (void(*)(int))((DWORD64)GetModuleHandleA("GameAssembly.dll") + 0x218AFA0);
-        InitState(Game->iSeed);
-        oRandom_Ctor(createdRandom, (void*)Game->iSeed);
-    }
+    RemoveInvalidRandoms(createdRandom);
 
+    if (createdRandom.size() > 0) {
+
+        oInitState(Game->iSeed);
+
+
+        for (auto pair : createdRandom) {
+            oRandom_Ctor(pair, (void*)Game->iSeed);
+        }
+
+
+    }
+    
     oRandom_Ctor(rcx, (void*)Game->iSeed);
 
 }
@@ -56,9 +65,11 @@ Random_Ctor_Default_t oRandom_Ctor_Default = nullptr;
 
 void __fastcall hkRandom_Ctor_Default(void* _this, void* rdx)
 {    
-
-
-    createdRandom = _this;
+    createdRandom.push_back(_this);
+    if (Game->bSeed) {
+        oRandom_Ctor(_this, (void*)Game->iSeed);
+        return;
+    }
 
     oRandom_Ctor_Default(_this, rdx);
 
@@ -234,10 +245,17 @@ DWORD WINAPI MainThread(LPVOID) {
     const char* pattern = "\x48\x89\x5c\x24\x00\x48\x89\x74\x24\x00\x57\x48\x83\xec\x00\x80\x3d\x00\x00\x00\x00\x00\x8b\xf2\x48\x8b\xd9\x75\x00\x48\x8d\x0d\x00\x00\x00\x00\xe8\x00\x00\x00\x00\x48\x8d\x0d\x00\x00\x00\x00\xe8\x00\x00\x00\x00\xc6\x05\x00\x00\x00\x00\x00\x48\x8b\x0d\x00\x00\x00\x00\xba";
     const char* mask = "xxxx?xxxx?xxxx?xx?????xxxxxx?xxx????x????xxx????x????xx?????xxx????x";
 
+    //auto InitState = (void(*)(int))((DWORD64)GetModuleHandleA("GameAssembly.dll") + 0x218AFA0);
+
      
 
     oRandom_Ctor = (Random_Ctor_t)scanner.FindPattern("GameAssembly.dll", pattern, mask);
+
+
+    pattern = "\x40\x53\x48\x83\xec\x00\x48\x8b\x05\x00\x00\x00\x00\x8b\xd9\x48\x85\xc0\x75\x00\x48\x8d\x0d\x00\x00\x00\x00\xe8\x00\x00\x00\x00\x48\x89\x05\x00\x00\x00\x00\x8b\xcb\x48\x83\xc4\x00\x5b\x48\xff\xe0\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\xcc\x48\x89\x5c\x24\x00\x57\x48\x83\xec\x00\x48\x8b\x05\x00\x00\x00\x00\x8b\xda\x8b\xf9\x48\x85\xc0\x75\x00\x48\x8d\x0d\x00\x00\x00\x00\xe8\x00\x00\x00\x00\x48\x89\x05\x00\x00\x00\x00\x8b\xd3\x8b\xcf\x48\x8b\x5c\x24\x00\x48\x83\xc4\x00\x5f\x48\xff\xe0\xcc\xcc\x48\x83\xec";
+    mask = "xxxxx?xxx????xxxxxx?xxx????x????xxx????xxxxx?xxxxxxxxxxxxxxxxxxxxxxx?xxxx?xxx????xxxxxxxx?xxx????x????xxx????xxxxxxxx?xxx?xxxxxxxxx";
     
+    oInitState = (tInitState)scanner.FindPattern("GameAssembly.dll", pattern, mask);
 
     MH_CreateHook((LPVOID)oRandom_Ctor, &hkIl2CppRandom, (LPVOID*)&oRandom_Ctor);
     
