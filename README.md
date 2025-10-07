@@ -1,7 +1,7 @@
 # megabonk-tracker
 A simple in-game overlay tool for Megabonk that displays remaining interactable elements on the current level.
 
-Real-time tracking of:
+### Real-time tracking of:
 - Merchants
 - Free chests
 - EXP
@@ -12,13 +12,17 @@ Real-time tracking of:
 - Challenge shrines
 - Totems
 
-UI can be turn off by pressing *INSERT*
+### Other Features:
+- Custom seed
 
-# Usage:
+**UI can be turn off by pressing *INSERT***
+
+## Usage:
 
 Extract .zip, open loader.exe.
 
 
+## Changes in 1.01
+- Custom seed for map generation
 
-
-<img width="300" height="227" alt="image" src="https://github.com/user-attachments/assets/1ace4670-d937-42b5-b8f2-095ed73a3208" />
+<img width="398" height="354" alt="image" src="https://github.com/user-attachments/assets/ebc19bda-f09d-4f40-ae9a-5bfd0edf1498" />
