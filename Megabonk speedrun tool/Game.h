@@ -13,7 +13,7 @@ size_t eraseAndCount(std::vector<T*>& vec, Predicate valid)
                 return !v || !valid(v);
             }),
         vec.end()
-                ); 
+                );
     return vec.size();
 }
 
